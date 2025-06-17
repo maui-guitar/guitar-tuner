@@ -44,6 +44,7 @@ int main(int argc, char *argv[])
     about.setProductName("maui/guitar");
     about.setBugAddress("https://github.com/maui-guitar/guitar-tuner/issues");
     // about.setOrganizationDomain(BUHO_URI);
+    about.addCredit("Olena Panasovska", "Guitar image assets", "", "https://thenounproject.com/browse/icons/term/guitar-headstock");
     about.setProgramLogo(app.windowIcon());
 
     KAboutData::setApplicationData(about);

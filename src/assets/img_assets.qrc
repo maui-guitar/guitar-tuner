@@ -2,4 +2,9 @@
     <qresource prefix="/img">
         <file>MauiGuitar.svg</file>
     </qresource>
+    <qresource prefix="/guitars">
+        <file>guitar-headstock-3.svg</file>
+        <file>guitar-headstock-2.svg</file>
+        <file>guitar-headstock.svg</file>
+    </qresource>
 </RCC>
