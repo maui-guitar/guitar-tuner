@@ -3,6 +3,7 @@ import QtQuick.Controls
 import QtQuick.Effects
 import QtQuick.Layouts
 import org.mauikit.controls as Maui
+import QtMultimedia
 
 Maui.ApplicationWindow {
 
@@ -39,115 +40,232 @@ Maui.ApplicationWindow {
                     border.color: Maui.Theme.alternateBackgroundColor
                 }
 
-                contentItem: Item
+                MediaPlayer {
+                    id: playMusic
+                    source: "/home/camilo/Music/record_0011.m4a"
+                    audioOutput: AudioOutput
+                    {
+                        volume: 1.0
+                    }
+                }
+
+
+                CaptureSession {
+                    id: captureSession
+
+                    audioInput: AudioInput
+                    {
+                        id: _input
+                         device: devices.defaultAudioInput
+                    }
+                    recorder: MediaRecorder {
+                        id: recorder
+                        // audioChannelCount: 2
+                        // quality: MediaRecorder.VeryHighQuality
+                        // encodingMode: MediaRecorder.ConstantBitRateEncoding
+                    }
+
+                     audioOutput : AudioOutput
+                     {
+                         id: _output
+                         volume: 0.2
+                         device: devices.defaultAudioOutput
+                     }
+                }
+
+                MediaDevices {
+                    id: devices
+                }
+
+                Timer {
+                       interval: 1000 // Check after 1 second
+                       repeat: true
+                       running: true
+                       onTriggered: {
+                           console.log("Audio Sample Rate:", recorder.audioSampleRate);
+                       }
+                   }
+
+                contentItem: ColumnLayout
                 {
                     Label
                     {
-                        anchors.fill: parent
                         font.pointSize: 60
                         font.bold: true
-                        text: "60 Hz"
+                        text: recorder.audioBitRate + " / " + recorder.audioSampleRate
                     }
-                }
-            }
 
-        Control
-        {
-            Maui.Theme.colorSet: Maui.Theme.Window
-            Maui.Theme.inherit: false
-            Layout.alignment: Qt.AlignCenter
-
-
-            implicitHeight: 400
-
-            padding: Maui.Style.defaultPadding
-
-            background: Rectangle
-            {
-                color: Maui.Theme.backgroundColor
-                radius: Maui.Style.radiusV
-                border.color: Maui.Theme.alternateBackgroundColor
-            }
-
-            component TuneButton : Button
-            {
-                implicitWidth: 60
-            }
-
-            contentItem:  RowLayout
-            {
-                spacing: Maui.Style.defaultSpacing
-            Column
-            {
-                Layout.topMargin: spacing
-                Layout.fillHeight: true
-                spacing: height * 0.065
-                TuneButton
-                {
-                    text: "D"
-
-                }
-
-                TuneButton
-                {
-                    text: "D"
-                }
-
-                TuneButton
-                {
-                    text: "D"
-                }
-            }
-            Item {
-
-                Layout.fillHeight: true
-                Layout.fillWidth: true
-                implicitWidth: _img.implicitWidth
-                                        Image
+                    Label
                     {
-                        id: _img
-                        height: parent.height
-                        visible: false
-                        source: "qrc:/guitars/guitar-headstock.svg"
-                        sourceSize.height: 400
-                        // sourceSize.width: width
-                        fillMode: Image.PreserveAspectFit
+                        text: recorder.actualLocation
                     }
 
-                    MultiEffect
+                    ComboBox
                     {
-                        source: _img
-                        anchors.fill: _img
-                        colorization: 1.0
-                        colorizationColor: Maui.Theme.textColor
+                        model: devices.audioInputs
+                        textRole: "description"
+
                     }
 
+                    ComboBox
+                    {
+                        model: devices.audioOutputs
+                        textRole: "description"
+
+                    }
+
+                    Slider
+                    {
+                        Layout.fillWidth: true
+                         from : 0
+                         to: 100
+                         value: recorder.audioBitRate
+                         live: false
+                         // onValueChanged: recorder.audioBitRate = value
+                    }
+
+                    Slider
+                    {
+                        Layout.fillWidth: true
+
+                         from : 0
+                         to: 10
+                         value: recorder.audioChannelCount
+                         live: false
+                         // onValueChanged: recorder.audioChannelCount = value
+                    }
+
+                    Slider
+                    {
+                        Layout.fillWidth: true
+
+                         from : 0
+                         to: 10
+                         value: recorder.audioSampleRate
+                         live: false
+                         // onValueChanged: recorder.audioSampleRate = value
+                    }
+
+                    Row{
+                        Layout.fillWidth: true
+                        Button {
+                            text: "Record"
+                            enabled: recorder.recorderState !== MediaRecorder.RecordingState
+                            onClicked: recorder.record()
+                        }
+
+                        Button {
+                            id: stopButton
+                            text: "Stop"
+                            enabled: recorder.recorderState === MediaRecorder.RecordingState
+                            onClicked: recorder.stop()
+                        }
+
+                        Button{
+                            text: "Play"
+                            onClicked: playMusic.play()
+                        }
+                    }
+                }
             }
 
-            Column
+            Control
             {
-                Layout.topMargin: spacing
-                Layout.fillHeight: true
-                spacing: height * 0.065
-                TuneButton
+                Maui.Theme.colorSet: Maui.Theme.Window
+                Maui.Theme.inherit: false
+                Layout.alignment: Qt.AlignCenter
+
+
+                implicitHeight: 400
+
+                padding: Maui.Style.defaultPadding
+
+                background: Rectangle
                 {
-                    text: "D"
+                    color: Maui.Theme.backgroundColor
+                    radius: Maui.Style.radiusV
+                    border.color: Maui.Theme.alternateBackgroundColor
                 }
 
-                TuneButton
+                component TuneButton : Button
                 {
-                    text: "D"
+                    implicitWidth: 60
                 }
 
-                TuneButton
+                contentItem:  RowLayout
                 {
-                    text: "D"
+                    spacing: Maui.Style.defaultSpacing
+                    Column
+                    {
+                        Layout.topMargin: spacing
+                        Layout.fillHeight: true
+                        spacing: height * 0.065
+                        TuneButton
+                        {
+                            text: "D"
+
+                        }
+
+                        TuneButton
+                        {
+                            text: "D"
+                        }
+
+                        TuneButton
+                        {
+                            text: "D"
+                        }
+                    }
+                    Item {
+
+                        Layout.fillHeight: true
+                        Layout.fillWidth: true
+                        implicitWidth: _img.implicitWidth
+                        Image
+                        {
+                            id: _img
+                            height: parent.height
+                            visible: false
+                            source: "qrc:/guitars/guitar-headstock.svg"
+                            sourceSize.height: 400
+                            // sourceSize.width: width
+                            fillMode: Image.PreserveAspectFit
+                        }
+
+                        MultiEffect
+                        {
+                            source: _img
+                            anchors.fill: _img
+                            colorization: 1.0
+                            colorizationColor: Maui.Theme.textColor
+                        }
+
+                    }
+
+                    Column
+                    {
+                        Layout.topMargin: spacing
+                        Layout.fillHeight: true
+                        spacing: height * 0.065
+                        TuneButton
+                        {
+                            text: "D"
+                        }
+
+                        TuneButton
+                        {
+                            text: "D"
+                        }
+
+                        TuneButton
+                        {
+                            text: "D"
+                        }
+                    }
                 }
+
+
             }
-                }
-
-
-        }
 
         }
     }
